@@ -41,7 +41,7 @@ pipeline {
 
           stage("Docker build"){
                steps {
-                 sh "docker build -t manhearty/calculator ."
+                 sh "service docker start && docker build -t manhearty/calculator ."
             }
           }
        }
