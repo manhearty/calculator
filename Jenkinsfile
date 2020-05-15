@@ -58,7 +58,28 @@ pipeline {
                  }
           }
           }
-    }
+          }
+
+          stage("Deploy to Staging"){
+               steps {
+               sh "docker run -d --rm -p 8765:8080 --name calculator manhearty/calculator:$BUILD_NUMBER"
+            }
+          }
+
+	  stage("Acceptance test"){
+               steps {
+               sleep 60
+               sh "chmod +x acceptance_test.sh && ./acceptance_test.sh"
+             }
+         }
+
+         post {
+              always {
+                  sh "docker stop calculator"
+             }
+
+         }
+
             
   }        
 }
