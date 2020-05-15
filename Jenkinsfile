@@ -53,6 +53,6 @@ pipeline {
                    sh "docker push manhearty/calculator"
                    }
                }
-             
-          }
+           }  
+  }        
 }
