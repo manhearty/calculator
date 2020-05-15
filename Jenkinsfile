@@ -1,4 +1,9 @@
 pipeline {
+     environment {
+        registry = "manhearty/calculator"
+        registryCredential = 'DOCKER'
+        dockerImage = ''
+     }
      agent any
      triggers{
          pollSCM('* * * * *')
@@ -26,33 +31,34 @@ pipeline {
                     sh "./gradlew jacocoTestCoverageVerification"
                }
           }
-
           stage("Static code analysis") {
                steps {
                     sh "./gradlew checkstyleMain"
           }
           }
-
           stage("Package"){
                steps {
                  sh "./gradlew build"
               }
           }
-
-          stage("Docker build"){
-               steps {
-                 sh "docker build -t manhearty/calculator ."
-            }
+	
+          stage('Building image') {
+             steps{
+                script {
+                   dockerImage = docker.build registry + ":$BUILD_NUMBER"
+                  }
+              }
           }
 
-          stage("Docker push") {
-               withCredentials([usernamePassword( credentialsId: 'DOCKER', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
-
-                   docker.withRegistry('', 'DOCKER') {
-                   sh "docker login -u ${USERNAME} -p ${PASSWORD}"
-                   sh "docker push manhearty/calculator"
-                   }
-               }
-           }  
+          stage('Deploy Image') {
+            steps{
+               script {
+                   docker.withRegistry( '', registryCredential ) {
+                   dockerImage.push()
+                 }
+          }
+          }
+    }
+            
   }        
 }
