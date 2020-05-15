@@ -44,5 +44,15 @@ pipeline {
                  sh "docker build -t manhearty/calculator ."
             }
           }
-       }
+
+          stage("Docker push") {
+               withCredentials([usernamePassword( credentialsId: 'DOCKER', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
+
+                   docker.withRegistry('', 'DOCKER') {
+                   sh "docker login -u ${USERNAME} -p ${PASSWORD}"
+                   sh "docker push manhearty/calculator"
+                   }
+               }
+             
+          }
 }
